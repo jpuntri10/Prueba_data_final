@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: diagrama-cajas-shiny
+    env: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    branch: main
