@@ -2,5 +2,7 @@ services:
   - type: web
     name: shiny-app
     env: r
-    buildCommand: "R -e 'install.packages(c(\"shiny\",\"ggplot2\",\"dplyr\",\"openxlsx\",\"scales\"))'"
-    startCommand: "R -e 'shiny::runApp(\".\", port=as.numeric(Sys.getenv(\"PORT\")), host=\"0.0.0.0\")'"
+    buildCommand: |
+      R -e 'install.packages(c("shiny","ggplot2","dplyr","openxlsx","scales","data.table"))'
+    startCommand: |
+      R -e 'shiny::runApp(".", port=as.numeric(Sys.getenv("PORT")), host="0.0.0.0")'
