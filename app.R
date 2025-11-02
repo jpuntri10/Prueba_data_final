@@ -1,27 +1,14 @@
-
-
-
+##
 library(shiny)
 library(ggplot2)
 library(dplyr)
 library(openxlsx)
-library(scales)  # Para formato con comas
+library(scales)
+library(data.table) # para lectura rápida
 
-# --- Paso 1: Cargar datos y generar resumen ---
-datos <- read.csv("data.csv")
-
-resumen <- datos %>%
-  group_by(ramo, TIPO_CLIENTE, numero_polizas) %>%
-  summarise(
-    Q1 = quantile(PRIMA_MES_TRIM_SEMES_SOLES, 0.25, na.rm = TRUE),
-    Q3 = quantile(PRIMA_MES_TRIM_SEMES_SOLES, 0.75, na.rm = TRUE),
-    mediana = median(PRIMA_MES_TRIM_SEMES_SOLES, na.rm = TRUE),
-    limite_superior = Q3 + 1.5 * (Q3 - Q1),
-    total_clientes = n(),
-    clientes_fuera = sum(PRIMA_MES_TRIM_SEMES_SOLES > (Q3 + 1.5 * (Q3 - Q1)), na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
-  mutate(porcentaje_fuera = round((clientes_fuera / total_clientes) * 100, 2))
+# --- Paso 1: Cargar resumen y datos originales ---
+resumen <- readRDS("resumen.rds")  # Preprocesado previamente
+datos <- fread("data.csv")         # Lectura rápida del CSV original
 
 # --- Paso 2: UI ---
 ui <- fluidPage(
@@ -65,7 +52,6 @@ server <- function(input, output) {
   output$boxplot <- renderPlot({
     df_resumen <- datos_filtro()
     df_original <- datos_originales()
-    
     limite <- df_resumen$limite_superior
     
     ggplot(df_original, aes(x = factor(numero_polizas), y = PRIMA_MES_TRIM_SEMES_SOLES)) +
@@ -78,7 +64,7 @@ server <- function(input, output) {
         y = "Prima (Soles)",
         x = "Número de pólizas"
       ) +
-      scale_y_continuous(labels = comma) +  # Eje Y con comas
+      scale_y_continuous(labels = comma) +
       theme_minimal()
   })
   
